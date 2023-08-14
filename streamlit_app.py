@@ -1,9 +1,14 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+from io import BytesIO
 from src.default_values import default_code
 from src.utils import *
 from src.plotting import *
+from src.helpers import generate_plot
+import datetime
+
+st.set_option('deprecation.showPyplotGlobalUse', False)
 
 # Set page configuration to wider layout
 st.set_page_config(layout="wide")
@@ -25,9 +30,8 @@ input_onset_time = None
 input_duration = None
 input_pars = [input_shape, input_position, input_onset_time, input_duration]
 
-
 # Create two columns
-col1, col2 = st.columns(2)
+col1, col2 = st.columns([1, 1])
 
 # Column 1: Text area for user input
 with col1:
@@ -55,53 +59,36 @@ with col1:
             except Exception as e:
                 st.write('An error occurred:', e)
 
-# Column 2: Choose plot type and Plot button
+# Column 2: Choose plot type and buttons
 with col2:
     # Choose plot type before generating the plot
-    plot_type = st.selectbox('Choose plot type:', ['Final state', 'Space-time (flat)', 'Space-time (3d)', 'Space-time (3d) + contour', 'Slider', 'Animated'], key='plot_type')
+    plot_type = st.selectbox('Choose plot type:',
+                             ['Final state', 'Space-time (flat)', 'Space-time (3d)', 'Space-time (3d) + contour'],
+                             key='plot_type')
 
-    # Plot button to generate the selected plot type
-    plot_button = st.button('Plot', key='plot_button')
-    if plot_button:
-        # if plot_type == 'Line Chart':
-        #     if not st.session_state.data.empty:
-        #         plt.plot(st.session_state.data['x'], st.session_state.data['y'])
-        #         st.pyplot(plt)
-        #     else:
-        #         st.write('Run the code to generate data before plotting.')
-        if plot_type == 'Space-time (flat)':
-            if 'field_activity' in st.session_state.simulation_results:
-                plot_space_time_flat(st.session_state.simulation_results['field_activity'], st.session_state.simulation_results['field_pars'])
-                st.pyplot(plt)
-            else:
-                st.write('Run the code to generate data before plotting.')
-        elif plot_type == 'Final state':
-            if 'field_activity' in st.session_state.simulation_results:
-                plot_final_state_1d(st.session_state.simulation_results['field_activity'], st.session_state.simulation_results['field_pars'])
-                st.pyplot(plt)
-            else:
-                st.write('Run the code to generate data before plotting.')
-        elif plot_type == 'Space-time (3d)':
-            if 'field_activity' in st.session_state.simulation_results:
-                plot_space_time_3d(st.session_state.simulation_results['field_activity'], st.session_state.simulation_results['field_pars'])
-                st.pyplot(plt)
-            else:
-                st.write('Run the code to generate data before plotting.')
-        elif plot_type == 'Space-time (3d) + contour':
-            if 'field_activity' in st.session_state.simulation_results:
-                plot_space_time_3d_contour(st.session_state.simulation_results['field_activity'], st.session_state.simulation_results['field_pars'])
-                st.pyplot(plt)
-            else:
-                st.write('Run the code to generate data before plotting.')
-        elif plot_type == 'Slider':
-            if 'field_activity' in st.session_state.simulation_results:
-                plot_slider_1d(st.session_state.simulation_results['field_activity'], st.session_state.simulation_results['field_pars'], st.session_state.simulation_results['inputs'], st.session_state.simulation_results['input_flag'])
-                st.pyplot(plt)
-            else:
-                st.write('Run the code to generate data before plotting.')
-        elif plot_type == 'Animated':
-            if 'field_activity' in st.session_state.simulation_results:
-                plot_animate_1d(st.session_state.simulation_results['field_activity'], st.session_state.simulation_results['field_pars'], st.session_state.simulation_results['inputs'], st.session_state.simulation_results['input_flag'])
-                st.pyplot(plt)
-            else:
-                st.write('Run the code to generate data before plotting.')
+    # Create buttons using provided code snippet
+    button_text = ['Plot']  # Removed 'Download figure' from button text
+    if button_text[0] == 'Plot':
+        figure = generate_plot(plot_type, st.session_state.simulation_results)  # Generate the figure
+        if figure is not None:
+            st.pyplot(figure)  # Display the figure
+
+            # Save the figure to a bytes-like object
+            img_stream = BytesIO()
+            figure.savefig(img_stream, format="png")
+            img_stream.seek(0)  # Move back to the beginning of the stream
+
+            # Get the current date and create the filename
+            current_datetime = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M')
+            file_name = f"{plot_type}_{current_datetime}.png"
+
+            # Display the download button
+            st.download_button(
+                label="Download figure",
+                data=img_stream,
+                file_name=file_name,
+                mime="image/png"
+            )
+
+        else:
+            st.write('Figure generation failed. Make sure to run the simulation first.')
