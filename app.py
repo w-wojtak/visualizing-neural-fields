@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 from io import BytesIO
-from src.default_values import default_code
+from src.default_values import *
 from src.utils import *
 from src.plotting import *
 from src.helpers import generate_plot
@@ -12,10 +12,6 @@ st.set_option('deprecation.showPyplotGlobalUse', False)
 
 # Set page configuration to wider layout
 st.set_page_config(layout="wide")
-
-# Initialize session state to store data
-if 'data' not in st.session_state:
-    st.session_state.data = pd.DataFrame()
 
 # Initialize session state to store simulation results
 if 'simulation_results' not in st.session_state:
@@ -35,6 +31,21 @@ col1, col2 = st.columns([1, 1])
 
 # Column 1: Text area for user input
 with col1:
+    kernel_type = st.selectbox('Choose kernel type:',
+                             ['Gaussian', 'Mex-hat'],
+                             key='kernel_type')
+
+    # Create text area for user input based on kernel type
+    if kernel_type == 'Gaussian':
+        kernel_pars = st.text_area("Enter Gaussian kernel parameters:", value=default_kernel_pars_gauss, height=20)
+        exec(kernel_pars, globals())
+    elif kernel_type == 'Mex-hat':
+        kernel_pars = st.text_area("Enter Mex-hat kernel parameters:", value=default_kernel_pars_mex, height=20)
+        exec(kernel_pars, globals())
+
+    # if kernel_type:
+    #     exec(kernel_pars, globals())
+
     code_snippet = st.text_area("Enter your model parameters here:", value=default_code, height=300)
     run_button = st.button('Run')
     simulate_message = st.empty()  # Placeholder for simulate_amari message
@@ -43,12 +54,10 @@ with col1:
         if code_snippet:
             try:
                 exec(code_snippet, globals())
-                if 'data' in globals():
-                    st.session_state.data = data  # Store 'x' and 'y' data in session state
                 if 'field_activity' in globals():
                     if all(v is not None for v in [input_shape, input_position, input_onset_time, input_duration]):
                         input_pars = [input_shape, input_position, input_onset_time, input_duration]
-                        field_activity, inputs = simulate_amari(field_pars, kernel_pars, input_flag, input_pars,
+                        field_activity, inputs = simulate_amari(kernel_type, field_pars, kernel_pars, input_flag, input_pars,
                                                                 initial_condition_shape)
                         st.session_state.simulation_results['field_activity'] = field_activity
                         st.session_state.simulation_results['inputs'] = inputs
