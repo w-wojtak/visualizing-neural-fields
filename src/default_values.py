@@ -24,3 +24,7 @@ kernel_pars = [1.3, 0.4, 0.5, 0.5, 0.15]
 default_kernel_pars_gauss = """
 kernel_pars = [1, 0.4, 0.2]
 """
+
+default_kernel_pars_osc = """
+kernel_pars = [1, 0.3, 0.9]
+"""

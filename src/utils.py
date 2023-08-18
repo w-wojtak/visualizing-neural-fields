@@ -30,6 +30,8 @@ def simulate_amari(kernel_type, field_pars, kernel_pars, input_flag, input_pars,
         w_hat = np.fft.fft(kernel_gauss(x, *kernel_pars))
     elif kernel_type == 'Mex-hat':
         w_hat = np.fft.fft(kernel_mex(x, *kernel_pars))
+    elif kernel_type == 'Oscillatory':
+        w_hat = np.fft.fft(kernel_osc(x, *kernel_pars))
 
     for i in range(0, len(t)):
         f_hat = np.fft.fft(np.heaviside(u_field - theta, 1))

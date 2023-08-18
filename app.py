@@ -32,7 +32,7 @@ col1, col2 = st.columns([1, 1])
 # Column 1: Text area for user input
 with col1:
     kernel_type = st.selectbox('Choose kernel type:',
-                             ['Gaussian', 'Mex-hat'],
+                             ['Gaussian', 'Mex-hat', 'Oscillatory'],
                              key='kernel_type')
 
     # Create text area for user input based on kernel type
@@ -41,6 +41,9 @@ with col1:
         exec(kernel_pars, globals())
     elif kernel_type == 'Mex-hat':
         kernel_pars = st.text_area("Enter Mex-hat kernel parameters:", value=default_kernel_pars_mex, height=20)
+        exec(kernel_pars, globals())
+    elif kernel_type == 'Oscillatory':
+        kernel_pars = st.text_area("Enter oscillatory kernel parameters:", value=default_kernel_pars_osc, height=20)
         exec(kernel_pars, globals())
 
     # if kernel_type:
