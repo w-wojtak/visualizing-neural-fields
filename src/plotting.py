@@ -4,6 +4,7 @@ import time
 from matplotlib.widgets import Slider, Button
 import streamlit as st
 
+
 def plot_final_state_1d(activity, field_pars):
     """
     Plots the final state of u(x,t) at time t=end.
@@ -176,11 +177,10 @@ def plot_animate_1d(activity, field_pars, inputs, input_flag):
 #     plt.show()
 
 
-
-
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+
 
 def plot_space_time_flat(activity, field_pars):
     x_lim, t_lim, _, _, _ = field_pars
@@ -236,7 +236,7 @@ def plot_space_time_3d(activity, field_pars):
     ax.zaxis.labelpad = 10
     ax.set_zlim(lower_lim, upper_lim)
 
-    ax.set_yticks(np.arange(-x_lim, x_lim + dx, 2))
+    ax.set_yticks(np.arange(-x_lim, x_lim + dx, 5))
 
     return fig
 
@@ -275,7 +275,7 @@ def plot_space_time_3d_contour(activity, field_pars):
     ax.zaxis.labelpad = 10
     ax.set_zlim(contour_offset, z_limit)
 
-    ax.set_yticks(np.arange(-x_lim, x_lim + dx, 2))
+    ax.set_yticks(np.arange(-x_lim, x_lim + dx, 5))
 
     return fig
 
@@ -303,4 +303,3 @@ def plot_time_courses(activity, field_pars, inputs, input_position):
     ax.set_xlim(t[0], t[-1])
 
     return figure
-

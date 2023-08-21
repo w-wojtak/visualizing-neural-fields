@@ -27,7 +27,7 @@ input_duration = None
 input_pars = [input_shape, input_position, input_onset_time, input_duration]
 
 # Create two columns
-col1, col2 = st.columns([1, 1])
+col1, col2 = st.columns([1.05, 0.95])
 
 # Column 1: Text area for user input
 with col1:
@@ -39,17 +39,17 @@ with col1:
     with col4:
         # Create text area for user input based on kernel type
         if kernel_type == 'Gaussian':
-            kernel_parameters = st.text_area("Gaussian kernel parameters:",
+            kernel_parameters = st.text_area("Gaussian kernel parameters and threshold for the activation function:",
                                        value=default_kernel_pars_gauss.strip(),
                                        height=20)
             exec(kernel_parameters, globals())
         elif kernel_type == 'Mex-hat':
-            kernel_parameters = st.text_area("Mex-hat kernel parameters:",
+            kernel_parameters = st.text_area("Mex-hat kernel parameters and threshold for the activation function:",
                                        value=default_kernel_pars_mex.strip(),
                                        height=20)
             exec(kernel_parameters, globals())
         elif kernel_type == 'Oscillatory':
-            kernel_parameters = st.text_area("Oscillatory kernel parameters:",
+            kernel_parameters = st.text_area("Oscillatory kernel parameters and threshold for the activation function:",
                                        value=default_kernel_pars_osc.strip(),
                                        height=20)
             exec(kernel_parameters, globals())
@@ -64,6 +64,16 @@ with col1:
         elif simulation_type == 'No input':
             input_flag = False
 
+        # Space is set as [-x_lim, x_lim], time as [0, t_lim]
+        # st.write("Field parameters")
+        code_limits = st.text_area(" Limits for space and time:", value=default_limits.strip(),
+                                  height=20)
+        exec(code_limits, globals())
+        code_dicsr = st.text_area("Spatial and temporal discretization:",
+                                   value=default_discr.strip(),
+                                   height=20)
+        exec(code_dicsr, globals())
+
     with col4:
         if simulation_type == 'Input':
             code_input = st.text_area("Input shape (amplitude, sigma) and position:", value=default_input.strip(), height=20)
@@ -71,33 +81,27 @@ with col1:
             code_input_time = st.text_area("Input timing (onset time and duration):", value=default_input_time.strip(), height=20)
             exec(code_input_time, globals())
             initial_condition_shape = None
+            st.write("Note: input_position, input_onset_time and input_duration must have the same length.")
         elif simulation_type == 'No input':
             code_ic = st.text_area("Initial condition parameters: (position, amplitude, sigma)", value=default_ic.strip(), height=20)
             exec(code_ic, globals())
-        st.write("Note: input_position, input_onset_time and input_duration must have the same length.")
 
-    code_snippet = st.text_area("Field parameters:", value=default_code.strip(), height=150)
-    run_button = st.button('Run')
+    run_button = st.button('Run simulation')
     simulate_message = st.empty()  # Placeholder for simulate_amari message
     if run_button:
-        # Check if the user provided code, then evaluate and populate DataFrame
-        if code_snippet:
-            try:
-                exec(code_snippet, globals())
-                if 'field_activity' in globals():
-                    if all(v is not None for v in [input_shape, input_position, input_onset_time, input_duration]):
-                        input_pars = [input_shape, input_position, input_onset_time, input_duration]
-                        field_activity, inputs = simulate_amari(kernel_type, field_pars, kernel_parameters, input_flag,
-                                                                input_pars,
-                                                                initial_condition_shape)
-                        st.session_state.simulation_results['field_activity'] = field_activity
-                        st.session_state.simulation_results['inputs'] = inputs
-                        st.session_state.simulation_results['field_pars'] = field_pars
-                        st.session_state.simulation_results['input_flag'] = input_flag
-                        simulate_message.success('simulate_amari function executed successfully!')
+        field_pars = [x_lim, t_lim, dx, dt, theta]
+        if 'field_activity' in globals():
+            if all(v is not None for v in [input_shape, input_position, input_onset_time, input_duration]):
+                input_pars = [input_shape, input_position, input_onset_time, input_duration]
+                field_activity, inputs = simulate_amari(kernel_type, field_pars, kernel_parameters, input_flag,
+                                                        input_pars,
+                                                        initial_condition_shape)
+                st.session_state.simulation_results['field_activity'] = field_activity
+                st.session_state.simulation_results['inputs'] = inputs
+                st.session_state.simulation_results['field_pars'] = field_pars
+                st.session_state.simulation_results['input_flag'] = input_flag
+                simulate_message.success('simulate_amari function executed successfully!')
 
-            except Exception as e:
-                st.write('An error occurred:', e)
 
 # Column 2: Choose plot type and buttons
 with col2:
