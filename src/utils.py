@@ -1,4 +1,5 @@
 import numpy as np
+import streamlit as st
 
 
 def kernel_mex(x, a_ex, s_ex, a_in, s_in, w_in):
@@ -47,11 +48,18 @@ def get_inputs(x, t, dt, input_pars, input_flag):
     inputs = np.zeros([len(t), len(x)])
 
     if input_flag:
-        for i in range(np.shape(input_onset_time)[0]):
-            # create a gaussian pattern for the current input
-            input_pattern = input_shape[0] * np.exp(-0.5 * (x - input_position[i]) ** 2 / input_shape[1] ** 2)
-            input_onset = int(input_onset_time[i] / dt)
-            inputs[input_onset:input_onset + int(input_duration[i] / dt), :] = input_pattern
+        # Check if the lengths of the three lists are equal
+        if len(input_position) == len(input_onset_time) == len(input_duration):
+
+            for i in range(np.shape(input_onset_time)[0]):
+                # create a gaussian pattern for the current input
+                input_pattern = input_shape[0] * np.exp(-0.5 * (x - input_position[i]) ** 2 / input_shape[1] ** 2)
+                input_onset = int(input_onset_time[i] / dt)
+                inputs[input_onset:input_onset + int(input_duration[i] / dt), :] = input_pattern
+
+        else:
+            st.warning("Warning: The lists with input parameters (input_position, input_onset_time, input_duration) "
+                       "must have the same length.")
 
     return inputs
 

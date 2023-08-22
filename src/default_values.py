@@ -1,8 +1,3 @@
-default_code = """
-x_lim, t_lim = 10, 15  # Limits for space and time. Space is set as [-x_lim, x_lim], time as [0, t_lim].
-dx, dt = 0.0025, 0.01  # Spatial and temporal discretization.
-"""
-
 default_limits = """
 x_lim = 10
 t_lim = 15
